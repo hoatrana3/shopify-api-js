@@ -72,8 +72,6 @@ export function begin(config: ConfigInterface) {
     const request = await abstractConvertRequest(adapterArgs);
     const response = await abstractConvertIncomingResponse(adapterArgs);
 
-    log.info('TEST');
-
     if (isbot(request.headers['User-Agent'])) {
       logForBot({request, log, func: 'begin'});
       response.statusCode = 410;
@@ -91,7 +89,7 @@ export function begin(config: ConfigInterface) {
       [STATE_COOKIE_NAME]: state,
     };
 
-    await cookies.setAndSign(
+    await cookies.set(
       FIREBASE_SESSION_COOKIE_NAME,
       JSON.stringify(firebaseSessionObj),
       {
@@ -166,7 +164,7 @@ export function callback(config: ConfigInterface) {
     });
 
     const firebaseSessionFromCookie =
-      (await cookies.getAndVerify(FIREBASE_SESSION_COOKIE_NAME)) ?? '{}';
+      (await cookies.get(FIREBASE_SESSION_COOKIE_NAME)) ?? '{}';
 
     const firebaseSessionObj = JSON.parse(firebaseSessionFromCookie);
     log.info('Callback - Current firebase session: ', firebaseSessionObj);
@@ -221,7 +219,7 @@ export function callback(config: ConfigInterface) {
     } else {
       firebaseSessionObj[SESSION_COOKIE_NAME] = session.id;
 
-      await cookies.setAndSign(
+      await cookies.set(
         FIREBASE_SESSION_COOKIE_NAME,
         JSON.stringify(firebaseSessionObj),
         {
