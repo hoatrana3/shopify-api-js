@@ -72,6 +72,8 @@ export function begin(config: ConfigInterface) {
     const request = await abstractConvertRequest(adapterArgs);
     const response = await abstractConvertIncomingResponse(adapterArgs);
 
+    log.info('TEST');
+
     if (isbot(request.headers['User-Agent'])) {
       logForBot({request, log, func: 'begin'});
       response.statusCode = 410;
@@ -99,6 +101,8 @@ export function begin(config: ConfigInterface) {
         path: callbackPath,
       },
     );
+
+    log.info('Begin - Set firebase session: ', firebaseSessionObj);
 
     const query = {
       client_id: config.apiKey,
@@ -165,6 +169,8 @@ export function callback(config: ConfigInterface) {
       (await cookies.getAndVerify(FIREBASE_SESSION_COOKIE_NAME)) ?? '{}';
 
     const firebaseSessionObj = JSON.parse(firebaseSessionFromCookie);
+    log.info('Callback - Current firebase session: ', firebaseSessionObj);
+
     const stateFromCookie = firebaseSessionObj[STATE_COOKIE_NAME];
 
     delete firebaseSessionObj[STATE_COOKIE_NAME];
