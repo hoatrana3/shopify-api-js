@@ -94,7 +94,7 @@ export function begin(config: ConfigInterface) {
       JSON.stringify(firebaseSessionObj),
       {
         expires: new Date(Date.now() + 60000),
-        sameSite: 'lax',
+        sameSite: 'none',
         secure: true,
         path: callbackPath,
       },
@@ -224,7 +224,7 @@ export function callback(config: ConfigInterface) {
         JSON.stringify(firebaseSessionObj),
         {
           expires: session.expires,
-          sameSite: 'lax',
+          sameSite: 'none',
           secure: true,
           path: '/',
         },
