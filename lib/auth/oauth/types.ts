@@ -1,5 +1,6 @@
 import {AdapterArgs} from '../../../runtime/http/types';
 
+export const FIREBASE_SESSION_COOKIE_NAME = '__session';
 export const SESSION_COOKIE_NAME = 'shopify_app_session';
 export const STATE_COOKIE_NAME = 'shopify_app_state';
 

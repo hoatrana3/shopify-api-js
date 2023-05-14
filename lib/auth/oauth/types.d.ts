@@ -1,4 +1,5 @@
 import { AdapterArgs } from '../../../runtime/http/types';
+export declare const FIREBASE_SESSION_COOKIE_NAME = "__session";
 export declare const SESSION_COOKIE_NAME = "shopify_app_session";
 export declare const STATE_COOKIE_NAME = "shopify_app_state";
 export interface AuthQuery {

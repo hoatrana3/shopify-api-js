@@ -24,6 +24,7 @@ import {
 import {logger, ShopifyLogger} from '../../logger';
 
 import {
+  FIREBASE_SESSION_COOKIE_NAME,
   SESSION_COOKIE_NAME,
   STATE_COOKIE_NAME,
   BeginParams,
@@ -84,12 +85,20 @@ export function begin(config: ConfigInterface) {
 
     const state = nonce();
 
-    await cookies.setAndSign(STATE_COOKIE_NAME, state, {
-      expires: new Date(Date.now() + 60000),
-      sameSite: 'none',
-      secure: true,
-      path: callbackPath,
-    });
+    const firebaseSessionObj = {
+      [STATE_COOKIE_NAME]: state,
+    };
+
+    await cookies.setAndSign(
+      FIREBASE_SESSION_COOKIE_NAME,
+      JSON.stringify(firebaseSessionObj),
+      {
+        expires: new Date(Date.now() + 60000),
+        sameSite: 'lax',
+        secure: true,
+        path: callbackPath,
+      },
+    );
 
     const query = {
       client_id: config.apiKey,
@@ -151,8 +160,14 @@ export function callback(config: ConfigInterface) {
       secure: true,
     });
 
-    const stateFromCookie = await cookies.getAndVerify(STATE_COOKIE_NAME);
-    cookies.deleteCookie(STATE_COOKIE_NAME);
+    const firebaseSessionFromCookie =
+      (await cookies.getAndVerify(FIREBASE_SESSION_COOKIE_NAME)) ?? '{}';
+
+    const firebaseSessionObj = JSON.parse(firebaseSessionFromCookie);
+    const stateFromCookie = firebaseSessionObj[STATE_COOKIE_NAME];
+
+    delete firebaseSessionObj[STATE_COOKIE_NAME];
+
     if (!stateFromCookie) {
       log.error('Could not find OAuth cookie', {shop});
 
@@ -194,13 +209,21 @@ export function callback(config: ConfigInterface) {
       config,
     });
 
-    if (!config.isEmbeddedApp) {
-      await cookies.setAndSign(SESSION_COOKIE_NAME, session.id, {
-        expires: session.expires,
-        sameSite: 'none',
-        secure: true,
-        path: '/',
-      });
+    if (config.isEmbeddedApp) {
+      cookies.deleteCookie(FIREBASE_SESSION_COOKIE_NAME);
+    } else {
+      firebaseSessionObj[SESSION_COOKIE_NAME] = session.id;
+
+      await cookies.setAndSign(
+        FIREBASE_SESSION_COOKIE_NAME,
+        JSON.stringify(firebaseSessionObj),
+        {
+          expires: session.expires,
+          sameSite: 'lax',
+          secure: true,
+          path: '/',
+        },
+      );
     }
 
     return {
