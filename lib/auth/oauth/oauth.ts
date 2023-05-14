@@ -118,6 +118,7 @@ export function begin(config: ConfigInterface) {
       ...response.headers,
       ...cookies.response.headers!,
       Location: redirectUrl,
+      'Cache-Control': 'private',
     };
 
     log.debug(`OAuth started, redirecting to ${redirectUrl}`, {shop, isOnline});
@@ -228,7 +229,10 @@ export function callback(config: ConfigInterface) {
 
     return {
       headers: (await abstractConvertHeaders(
-        cookies.response.headers!,
+        {
+          ...cookies.response.headers!,
+          'Cache-Control': 'private',
+        },
         adapterArgs,
       )) as T,
       session,
